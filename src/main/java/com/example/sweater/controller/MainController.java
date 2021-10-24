@@ -63,8 +63,8 @@ public class MainController {
       }
       String uuidFile = UUID.randomUUID().toString();
       String resultFilename = uuidFile + "." + file.getOriginalFilename();
-      file.transferTo(new File(resultFilename));
-      message.setFilename(uploadPath + "/" + resultFilename);
+      file.transferTo(new File(uploadPath + "/" + resultFilename));
+      message.setFilename(resultFilename);
     }
     messageRepo.save(message);
     Iterable<Message> messages = messageRepo.findAll();

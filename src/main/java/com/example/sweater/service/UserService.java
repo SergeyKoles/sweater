@@ -4,9 +4,11 @@ import com.example.sweater.domain.Role;
 import com.example.sweater.domain.User;
 import com.example.sweater.repos.UserRepo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -18,11 +20,19 @@ import java.util.stream.Collectors;
 public class UserService implements UserDetailsService {
 
   private final UserRepo userRepo;
+
   private final MailSender mailSender;
+
+  @Autowired
+  private PasswordEncoder passwordEncoder;
 
   @Override
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-    return userRepo.findByUsername(username);
+    User user = userRepo.findByUsername(username);
+    if (user == null) {
+      throw new UsernameNotFoundException("User not found");
+    }
+    return user;
   }
 
   public boolean addUser(User user) {
@@ -33,6 +43,7 @@ public class UserService implements UserDetailsService {
     user.setActive(true);
     user.setRoles(Collections.singleton(Role.USER));
     user.setActivationCode(UUID.randomUUID().toString());
+    user.setPassword(passwordEncoder.encode(user.getPassword()));
     userRepo.save(user);
 
     sendMessage(user);

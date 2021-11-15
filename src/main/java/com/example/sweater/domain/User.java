@@ -1,5 +1,6 @@
 package com.example.sweater.domain;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
@@ -15,6 +16,7 @@ import java.util.Set;
 @Table(name = "usr")
 @Getter
 @Setter
+@EqualsAndHashCode(of = "id")
 public class User implements UserDetails {
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
@@ -35,6 +37,9 @@ public class User implements UserDetails {
   @CollectionTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"))
   @Enumerated(EnumType.STRING)
   private Set<Role> roles;
+
+  @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  private Set<Message> messages;
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {

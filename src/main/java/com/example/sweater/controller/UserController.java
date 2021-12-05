@@ -6,6 +6,7 @@ import com.example.sweater.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -57,7 +58,42 @@ public class UserController {
           @RequestParam String password,
           @RequestParam String email
   ) {
-userService.updateProfile(user,password,email);
+    userService.updateProfile(user, password, email);
     return "redirect:/user/profile";
+  }
+
+  @GetMapping("subscribe/{user}")
+  public String subscribe(
+          @AuthenticationPrincipal User currentUser,
+          @PathVariable User user
+  ) {
+    userService.subscribe(currentUser, user);
+    return "redirect:/user-messages/" + user.getId();
+  }
+
+  @GetMapping("unsubscribe/{user}")
+  public String unsubscribe(
+          @AuthenticationPrincipal User currentUser,
+          @PathVariable User user
+  ) {
+    userService.unsubscribe(currentUser, user);
+    return "redirect:/user-messages/" + user.getId();
+  }
+
+  @GetMapping("{type}/{user}/list")
+  public String userList(
+          Model model,
+          @PathVariable String type,
+          @PathVariable User user
+  ) {
+    model.addAttribute("userChannel", user);
+    model.addAttribute("type", type);
+
+    if ("subscriptions".equals(type)) {
+      model.addAttribute("users", user.getSubscriptions());
+    } else {
+      model.addAttribute("users", user.getSubscribers());
+    }
+    return "subscriptions";
   }
 }

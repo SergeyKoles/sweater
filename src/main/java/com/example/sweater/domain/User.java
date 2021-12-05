@@ -5,11 +5,13 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -40,6 +42,21 @@ public class User implements UserDetails {
 
   @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   private Set<Message> messages;
+
+  @ManyToMany
+  @JoinTable(
+          name = "user_subscriptions",
+          joinColumns = {@JoinColumn(name = "chanel_id")},
+          inverseJoinColumns = {@JoinColumn(name = "subscriber_id")}
+  )
+  private Set<User> subscribers = new HashSet<>();
+  @ManyToMany
+  @JoinTable(
+          name = "user_subscriptions",
+          joinColumns = {@JoinColumn(name = "subscriber_id")},
+          inverseJoinColumns = {@JoinColumn(name = "chanel_id")}
+  )
+  private Set<User> subscriptions = new HashSet<>();
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
